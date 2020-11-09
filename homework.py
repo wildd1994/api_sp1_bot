@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
+PRAKTIKUM_TOKEN = os.getenv("PRAKTIKUM_TOKEN")
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
@@ -33,7 +33,7 @@ def parse_homework_status(homework):
 
 
 def get_homework_statuses(current_timestamp):
-    headers = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
+    headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
     params = {'from_date': current_timestamp}
     try:
         homework_statuses = requests.get(URL, headers=headers, params=params)
@@ -43,19 +43,19 @@ def get_homework_statuses(current_timestamp):
     return homework_statuses.json()
 
 
-def send_message(message):
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    return bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+def send_message(message, bot_client):
+    return bot_client.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
 
 
 def main():
+    bot_client = telegram.Bot(token=TELEGRAM_TOKEN)
     current_timestamp = int(time.time())  # начальное значение timestamp
 
     while True:
         try:
             new_homework = get_homework_statuses(current_timestamp)
             if new_homework.get('homeworks'):
-                send_message(parse_homework_status(new_homework.get('homeworks')[0]))
+                send_message(parse_homework_status(new_homework.get('homeworks')[0]), bot_client)
             current_timestamp = new_homework.get('current_date')  # обновить timestamp
             time.sleep(300)  # опрашивать раз в пять минут
 
