@@ -20,8 +20,10 @@ def parse_homework_status(homework):
         homework_name = homework['homework_name']
     except KeyError as e:
         logging.exception(f'Key error detected. Error: {e}')
+        raise e
     except IndexError as e:
         logging.exception(f'Index error detected. Error: {e}')
+        raise e
     status = homework['status']
     if status == 'rejected':
         verdict = 'К сожалению в работе нашлись ошибки.'
