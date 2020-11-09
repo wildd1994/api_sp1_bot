@@ -15,7 +15,6 @@ TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
 
 
-
 def parse_homework_status(homework):
     try:
         homework_name = homework['homework_name']
