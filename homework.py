@@ -16,30 +16,33 @@ URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
 
 
 def parse_homework_status(homework):
-    try:
-        homework_name = homework['homework_name']
-    except KeyError as e:
-        logging.exception(f'Key error detected. Error: {e}')
-        raise e
-    except IndexError as e:
-        logging.exception(f'Index error detected. Error: {e}')
-        raise e
+    homework_name = homework['homework_name']
     status = homework['status']
-    if status == 'rejected':
-        verdict = 'К сожалению в работе нашлись ошибки.'
+    if not homework_name or not status:
+        return 'Ошибки на сервере'
     else:
-        verdict = 'Ревьюеру всё понравилось, можно приступать к следующему уроку.'
+        if status == 'rejected':
+            verdict = 'К сожалению в работе нашлись ошибки.'
+        elif status == 'approved':
+            verdict = 'Ревьюеру всё понравилось, можно приступать к следующему уроку.'
+        else:
+            return f'{status} - что-то новенькое!'
     return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
 
 def get_homework_statuses(current_timestamp):
     headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
+    if not current_timestamp:
+        current_timestamp = int(time.time())
     params = {'from_date': current_timestamp}
     try:
         homework_statuses = requests.get(URL, headers=headers, params=params)
     except requests.exceptions.RequestException as e:
         logging.exception(f'Connection error detected. Error: {e}')
-        raise e
+        return {}
+    except ValueError as e:
+        logging.exception(f'Value error detected. Error: {e}')
+        return {}
     return homework_statuses.json()
 
 
