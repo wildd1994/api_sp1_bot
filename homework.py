@@ -31,19 +31,17 @@ def parse_homework_status(homework):
 
 def get_homework_statuses(current_timestamp):
     headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
-    if current_timestamp is None:
-        current_timestamp = int(time.time())
+    current_timestamp = int(time.time()) if current_timestamp is None \
+        else current_timestamp
     params = {'from_date': current_timestamp}
     try:
         homework_statuses = requests.get(URL, headers=headers, params=params)
+        return homework_statuses.json()
     except requests.exceptions.RequestException as e:
         logging.exception(f'Connection error detected. Error: {e}')
-        return {}
-    try:
-        return homework_statuses.json()
     except ValueError as e:
         logging.exception(f'Value error detected. Error: {e}')
-        return {}
+    return {}
 
 
 def send_message(message, bot_client):
