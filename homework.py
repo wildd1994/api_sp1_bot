@@ -16,23 +16,22 @@ URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
 
 
 def parse_homework_status(homework):
-    homework_name = homework['homework_name']
-    status = homework['status']
-    if not homework_name or not status:
+    homework_name = homework.get('homework_name')
+    status = homework.get('status')
+    if homework_name is None or status is None:
         return 'Ошибки на сервере'
+    if status == 'rejected':
+        verdict = 'К сожалению в работе нашлись ошибки.'
+    elif status == 'approved':
+        verdict = 'Ревьюеру всё понравилось, можно приступать к следующему уроку.'
     else:
-        if status == 'rejected':
-            verdict = 'К сожалению в работе нашлись ошибки.'
-        elif status == 'approved':
-            verdict = 'Ревьюеру всё понравилось, можно приступать к следующему уроку.'
-        else:
-            return f'{status} - что-то новенькое!'
+        return f'{status} - что-то новенькое!'
     return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
 
 def get_homework_statuses(current_timestamp):
     headers = {'Authorization': f'OAuth {PRAKTIKUM_TOKEN}'}
-    if not current_timestamp:
+    if current_timestamp is None:
         current_timestamp = int(time.time())
     params = {'from_date': current_timestamp}
     try:
@@ -40,10 +39,11 @@ def get_homework_statuses(current_timestamp):
     except requests.exceptions.RequestException as e:
         logging.exception(f'Connection error detected. Error: {e}')
         return {}
+    try:
+        return homework_statuses.json()
     except ValueError as e:
         logging.exception(f'Value error detected. Error: {e}')
         return {}
-    return homework_statuses.json()
 
 
 def send_message(message, bot_client):
